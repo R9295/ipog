@@ -17,7 +17,7 @@
 use std::io::Write;
 use std::time::Instant;
 
-use crate::util::{comb, commas, perm, Progress, Rng, Tie};
+use crate::util::{comb, commas, perm, perm_commas, Progress, Rng, Tie};
 
 /// Enumerate every k-combination (order preserved) of `items[start..]`, feeding
 /// each one to `f` as a mixed-radix index accumulated onto `acc`.
@@ -303,7 +303,10 @@ pub fn run(events: &[String], t: usize, seed: u64) {
     println!("  comb({n}, {t}) = {:>12}   distinct event subsets", commas(comb(nn, tt)));
     println!("  perm({t}, {t}) = {:>12}   orderings per subset", commas(perm(tt, tt)));
     println!("  perm({n}, {t}) = {:>12}   ordered tuples to cover", commas(perm(nn, tt)));
-    println!("  perm({n}, {n}) = {:>12}   possible rows (search space)", commas(perm(nn, nn)));
+    println!(
+        "  perm({n}, {n}) = {:>12}   possible rows (search space)",
+        perm_commas(n, n)
+    );
     println!(
         "  each row of length {n} covers up to comb({n}, {t}) = {} tuples",
         commas(comb(nn, tt))

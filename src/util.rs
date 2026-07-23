@@ -97,6 +97,47 @@ pub fn perm(n: u128, k: u128) -> u128 {
     (0..k).map(|i| n - i).product()
 }
 
+/// Exact, comma-separated `nPk`, including values too large for `u128`.
+///
+/// This is used for informational search-space sizes. The generators' working
+/// counts still use fixed-width integers because those counts must be
+/// addressable in memory.
+pub fn perm_commas(n: usize, k: usize) -> String {
+    assert!(k <= n, "cannot choose {k} ordered items from {n}");
+
+    // Little-endian base-10^9 limbs make comma formatting direct.
+    const BASE: u128 = 1_000_000_000;
+    let mut limbs = vec![1u32];
+    for i in 0..k {
+        let factor = (n - i) as u128;
+        let mut carry = 0u128;
+        for limb in &mut limbs {
+            let product = *limb as u128 * factor + carry;
+            *limb = (product % BASE) as u32;
+            carry = product / BASE;
+        }
+        while carry != 0 {
+            limbs.push((carry % BASE) as u32);
+            carry /= BASE;
+        }
+    }
+
+    let mut parts = limbs.iter().rev();
+    let mut decimal = parts.next().unwrap().to_string();
+    for part in parts {
+        decimal.push_str(&format!("{part:09}"));
+    }
+
+    let mut out = String::with_capacity(decimal.len() + decimal.len() / 3);
+    for (i, c) in decimal.chars().enumerate() {
+        if i > 0 && (decimal.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
 pub fn comb(n: u128, k: u128) -> u128 {
     let mut r = 1u128;
     for i in 0..k {
@@ -115,4 +156,18 @@ pub fn commas(x: u128) -> String {
         out.push(c);
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::perm_commas;
+
+    #[test]
+    fn formats_permutations_beyond_u128() {
+        assert_eq!(perm_commas(5, 3), "60");
+        assert_eq!(
+            perm_commas(72, 72),
+            "61,234,458,376,886,086,861,524,070,385,274,672,740,778,091,784,697,328,983,823,014,963,978,384,987,221,689,274,204,160,000,000,000,000,000"
+        );
+    }
 }

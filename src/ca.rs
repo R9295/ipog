@@ -18,7 +18,7 @@
 use std::io::Write;
 use std::time::Instant;
 
-use crate::util::{comb, commas, Progress, Rng, Tie};
+use crate::util::{comb, commas, perm_commas, Progress, Rng, Tie};
 
 /// Cell value meaning "unconstrained" - free to be filled in later.
 const DC: u8 = u8::MAX;
@@ -298,7 +298,7 @@ pub fn run(n: usize, values: &[String], t: usize, seed: u64, use_oa: bool) {
     println!("  {v}^{n}             = {:>22}   exhaustive (all inputs)", commas(vv.pow(n as u32)));
     println!(
         "  perm({n}, {n})      = {:>22}   orderings of one row (if sequence matters)",
-        commas((1..=nn).product::<u128>())
+        perm_commas(n, n)
     );
     if !use_oa && orthogonal_array(n, v, t).is_some() {
         println!("  note                = {v} is prime and {n} <= {v}+1, so an orthogonal array hits");
